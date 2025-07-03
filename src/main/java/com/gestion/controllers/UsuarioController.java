@@ -21,6 +21,10 @@ import com.gestion.services.UsuarioService;
 
 import lombok.RequiredArgsConstructor;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.hateoas.Link;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
@@ -60,5 +64,40 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         service.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // METODO HATEOAS para buscar por ID
+    @GetMapping("/hateoas/{id}")
+    public UsuarioDTO obtenerHATEOAS(@PathVariable Integer id) {
+        UsuarioDTO dto = service.buscarUsuarioPorId(id);
+
+        // links urls de la misma API
+        dto.add(linkTo(methodOn(UsuarioController.class).obtenerHATEOAS(id)).withSelfRel());
+        dto.add(linkTo(methodOn(UsuarioController.class).obtenerTodosHATEOAS()).withRel("todos"));
+        dto.add(linkTo(methodOn(UsuarioController.class).eliminar(id)).withRel("eliminar"));
+
+        // links HATEOAS para API Gateway "A mano"
+        dto.add(Link.of("http://localhost:8888/api/proxy/usuarios/" + dto.getIdUsuario()).withSelfRel());
+        dto.add(Link.of("http://localhost:8888/api/proxy/usuarios/" + dto.getIdUsuario()).withRel("Modificar HATEOAS").withType("PUT"));
+        dto.add(Link.of("http://localhost:8888/api/proxy/usuarios/" + dto.getIdUsuario()).withRel("Eliminar HATEOAS").withType("DELETE"));
+
+        return dto;
+    }
+
+    // METODO HATEOAS para listar todos los usuarios utilizando HATEOAS
+    @GetMapping("/hateoas")
+    public List<UsuarioDTO> obtenerTodosHATEOAS() {
+        List<UsuarioDTO> lista = service.listarUsuarios();
+
+        for (UsuarioDTO dto : lista) {
+            // link url de la misma API
+            dto.add(linkTo(methodOn(UsuarioController.class).obtenerHATEOAS(dto.getIdUsuario())).withSelfRel());
+
+            // links HATEOAS para API Gateway "A mano"
+            dto.add(Link.of("http://localhost:8888/api/proxy/usuarios").withRel("Get todos HATEOAS"));
+            dto.add(Link.of("http://localhost:8888/api/proxy/usuarios/" + dto.getIdUsuario()).withRel("Crear HATEOAS").withType("POST"));
+        }
+
+        return lista;
     }
 }

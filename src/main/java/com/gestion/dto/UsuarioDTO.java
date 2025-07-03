@@ -1,13 +1,14 @@
 package com.gestion.dto;
 
-import lombok.AllArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UsuarioDTO {
+@AllArgsConstructor
+public class UsuarioDTO extends RepresentationModel<UsuarioDTO> {
     private Integer idUsuario;
     private String nombreUsuario;
     private String email;
