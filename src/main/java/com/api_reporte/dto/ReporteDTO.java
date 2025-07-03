@@ -1,13 +1,16 @@
 package com.api_reporte.dto;
 
-import lombok.Data;
-import java.time.LocalDate;
+import org.springframework.hateoas.RepresentationModel;
+import lombok.*;
 
 @Data
-public class ReporteDTO {
-    private Integer idReporte;
-    private String tipoReporte;
-    private LocalDate fechaGeneracion;
+@NoArgsConstructor
+@AllArgsConstructor
+public class ReporteDTO extends RepresentationModel<ReporteDTO> {
+    private Integer id;
+    private String nombre;
     private String descripcion;
-    private String jsonDatos;
+    private Double precioUnitario;
+    private String categoria;
+    private Boolean estado;
 }
